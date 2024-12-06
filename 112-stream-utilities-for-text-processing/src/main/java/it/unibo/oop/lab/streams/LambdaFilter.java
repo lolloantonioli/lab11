@@ -6,7 +6,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -38,7 +40,23 @@ public final class LambdaFilter extends JFrame {
         /**
          * Commands.
          */
-        IDENTITY("No modifications", Function.identity());
+        IDENTITY("No modifications", Function.identity()),
+        LOWERCASE("Convert to lower case", String::toLowerCase),
+        COUNTCHARS("Count the number of chars", r -> Integer.toString(r.length())),
+        COUNTLINES("Count the number of lines", r ->  Long.toString(r.chars().filter(n -> n == '\n').count() + 1)),
+        LISTORDER("List in alphabetical order", r -> 
+            Arrays.stream(r.split(" "))
+                .sorted(String::compareTo)
+                .collect(Collectors.joining(" "))
+        ),
+        COUNTWORDS("Write the count for each word", r ->
+            Arrays.stream(r.split(" "))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .map(i -> i.getKey() + " -> " + i.getValue())
+                .collect(Collectors.joining(" "))
+        );
 
         private final String commandName;
         private final Function<String, String> fun;
@@ -60,7 +78,7 @@ public final class LambdaFilter extends JFrame {
 
     private LambdaFilter() {
         super("Lambda filter GUI");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         final JPanel panel1 = new JPanel();
         final LayoutManager layout = new BorderLayout();
         panel1.setLayout(layout);
